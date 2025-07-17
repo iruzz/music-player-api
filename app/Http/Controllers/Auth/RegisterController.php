@@ -12,18 +12,26 @@ class RegisterController extends Controller
      * Handle the incoming request.
      */
     public function __invoke(Request $request)
-    {
-        $user = User::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => bcrypt($request->input('password')),
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|string|min:6',
+    ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => bcrypt($validated['password']),
+        'role' => 'user', // tambahkan role default
+    ]);
 
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-        ]);
-    }
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'user' => $user,
+        'token' => $token,
+    ]);
+}
+
 }

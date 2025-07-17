@@ -23,12 +23,17 @@ class LoginController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $user = User::where('email', $request->email)->first();
+        $user = Auth::user(); // gunakan Auth::user() langsung setelah attempt
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => [
+                'id'    => $user->id,
+                'name'  => $user->name,
+                'email' => $user->email,
+                'role'  => $user->role, // ⬅️ Pastikan field 'role' ada di DB
+            ],
             'token' => $token,
         ]);
     }
